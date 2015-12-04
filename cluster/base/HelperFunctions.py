@@ -20,8 +20,9 @@ def get_flat_list(list_of_lists):
 
 def list_magic(point, points):
     """
-        point - (x,y)
-        points - list of pointlists [[(1,2),(2,3)],[(3,4),(6,5)]]
+        :param point - (x,y)
+        :param points - list of pointlists [[(1,2),(2,3)],[(3,4),(6,5)]]
+        :return set of unique points
     """
 
     old = set()

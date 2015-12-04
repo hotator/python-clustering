@@ -1,8 +1,5 @@
 #!/usr/bin/python3.3
 # -*- coding: utf-8 -*-
-"""
-    
-"""
 
-__author__ = 'Severin Orth <severin.orth@st.ovgu.de>'
-__date__ = '24.03.13'
+__author__ = 'Stephan Besecke <stephan.besecke@st.ovgu.de>'
+__date__ = '05.12.2015'

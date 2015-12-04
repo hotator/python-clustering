@@ -14,7 +14,8 @@ class Combi(Cluster):
     def calculate(self):
         """ cluster algo """
         points = list(set(self.points))
-        pair_list = sorted([(points.index(p1), points.index(p2), distance(p1, p2)) for p1, p2 in combinations(points, 2)], key=lambda x: x[2])
+        pair_list = sorted([(points.index(p1), points.index(p2), distance(p1, p2))
+                            for p1, p2 in combinations(points, 2)], key=lambda x: x[2])
         loc = dict()
 
         for pair in pair_list:

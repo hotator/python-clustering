@@ -14,7 +14,7 @@ class Cluster(object):
         # TODO: has verify -> as init argument
         # Attributes
         if points.shape[1] == 2:
-            self.points = points[:, [0, 1]] # update for bla
+            self.points = points[:, [0, 1]]  # update for bla
             self.verify = []
         else:
             self.points = points[:, range(points.shape[1] - 1)]

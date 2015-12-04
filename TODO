@@ -2,3 +2,5 @@
 - add more clustering algorithms
 - fix Combi
 - fix or implement Voro correct
+- more distance measures
+- remove numpy requirements
