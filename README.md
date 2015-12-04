@@ -3,6 +3,11 @@ A simple clustering Class written in python
 
 should work in python 2 and 3
 
+## requirements
+- numpy
+- scipy
+- matplotlib (pyplot)
+
 ## usage
 in main.py:
 - generate or import some datapoints to an numpy-array
@@ -18,4 +23,4 @@ in main.py:
 - each sublist contains all points which form a cluster
 - that was it :)
 - some helper functions are available in the file with this name
-enjoy :)
+- enjoy :)
