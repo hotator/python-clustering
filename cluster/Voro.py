@@ -3,7 +3,7 @@
 """ clustering with voronoi cells """
 
 from .base.Cluster import Cluster
-from scipy.spatial import Voronoi
+from scipy.spatial import Voronoi, voronoi_plot_2d
 import matplotlib.pyplot as plt
 
 
@@ -12,12 +12,12 @@ class Voro(Cluster):
 
     def __init__(self, points):
         Cluster.__init__(self, points)
-        vor = Voronoi(self.points, qhull_options='Qbb Qc Qz')
-        self.point_region = vor.point_region
-        self.vertices = vor.vertices
-        self.regions = vor.regions
-        self.ridge_points = vor.ridge_points
-        self.ridge_vertices = vor.ridge_vertices
+        self.vor = Voronoi(self.points, qhull_options='Qbb Qc Qz')
+        self.point_region = self.vor.point_region
+        self.vertices = self.vor.vertices
+        self.regions = self.vor.regions
+        self.ridge_points = self.vor.ridge_points
+        self.ridge_vertices = self.vor.ridge_vertices
         self.point_areas = None
         self.area_indices = None
 
@@ -59,4 +59,5 @@ class Voro(Cluster):
         vert = self.get_vertices(point_index)
         return self.area(vert)
 
-
+    def plot_cells_2d(self):
+        voronoi_plot_2d(self.vor)

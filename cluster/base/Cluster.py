@@ -13,13 +13,8 @@ class Cluster(object):
         """ constuctor """
         # TODO: has verify -> as init argument
         # Attributes
-        if points.shape[1] == 2:
-            self.points = points[:, [0, 1]]  # update for bla
-            self.verify = []
-        else:
-            self.points = points[:, range(points.shape[1] - 1)]
-            self.verify = points[:, points.shape[1] - 1]
-        self.colors = 'rgbcmyk'
+        self.points = points
+        self.verify = []
         self.result = []
 
     def __str__(self):
@@ -54,15 +49,6 @@ class Cluster(object):
     @staticmethod
     def plot_marker(x, y):
         plt.plot(x, y, "or", color="red", ms=10.0)
-
-    def plot_res(self):
-        """ plot the results """
-        """ format: [[point, point, point], [point, point, point, point]...] """
-        for i, point_list in enumerate(self.result):
-            for point in point_list:
-                plt.plot(point[0], point[1], self.colors[i % 7] + "o")
-        print("Number of cluster: {}".format(len(self.result)))
-        plt.show()
 
     def verify_result(self):
         # TODO: update function

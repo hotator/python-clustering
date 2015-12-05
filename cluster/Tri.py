@@ -6,6 +6,7 @@ from .base.Cluster import Cluster
 from .base.HelperFunctions import get_connected_points, mydist
 from scipy.spatial import Delaunay
 import matplotlib.pyplot as plt
+from itertools import combinations
 
 
 class Tri(Cluster):
@@ -13,22 +14,24 @@ class Tri(Cluster):
         Cluster.__init__(self, points)
         tri = Delaunay(self.points)
         self.simplices = tri.simplices
+        self.connected = []
+
+    def get_connected(self):
+        dist = []
+        for simplice in self.simplices:
+            for t in combinations(simplice, 2):
+                dist += [(mydist(self.points[t[0]], self.points[t[1]]), t[0], t[1])]
+        dist = list(set(dist))
+        dist.sort()
+        self.connected = [(p1, p2) for _, p1, p2 in dist]
 
     def calculate(self):
         # TODO: for areas simple extra function like this - this = proxy
-        dist = []
-        for triple in self.simplices:
-            dist += [(mydist(self.points[triple[0]], self.points[triple[1]]), triple[0], triple[1])]
-            dist += [(mydist(self.points[triple[1]], self.points[triple[2]]), triple[1], triple[2])]
-            dist += [(mydist(self.points[triple[2]], self.points[triple[0]]), triple[2], triple[0])]
-
-        dist = list(set(dist))
-        dist.sort()
-        dist = [(p1, p2) for _, p1, p2 in dist]
+        self.get_connected()
 
         temp_set = set()
         pre_res = []
-        for p in dist:
+        for p in self.connected:
             temp_set |= {p[0], p[1]}
             pre_res += [[tuple(self.points[p[0]]), tuple(self.points[p[1]])]]
             if len(temp_set) == len(self.points):

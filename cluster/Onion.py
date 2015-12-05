@@ -112,4 +112,4 @@ class Onion(Cluster):
             x += (x[0],)
             y += (y[0],)
             plt.plot(x, y)
-        plt.show()
+        #plt.show()
