@@ -9,11 +9,15 @@ from sklearn import datasets
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from scipy.spatial import Delaunay
 
 
 def plot_2d(data_set):
-    """ plot the results """
-    """ format: [[point, point, point], [point, point, point, point]...] """
+    """
+        plot the results
+        :param data_set:
+            format: [[point, point, point], [point, point, point, point]...]
+    """
     colors = 'rgbcmyk'
     for i, point_list in enumerate(data_set):
         x, y = zip(*point_list)
@@ -23,7 +27,11 @@ def plot_2d(data_set):
 
 
 def plot_3d(data_set):
-    """ plot 3d dataset """
+    """
+        plot the results in 3d
+        :param data_set:
+            format: [[point, point, point], [point, point, point, point]...]
+    """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     colors = 'rgbcmyk'
@@ -50,12 +58,13 @@ if __name__ == '__main__':
 
     # antenne, moons, duenn, achsen, points_bloed, sixfour, noise, circles, blobs
     pts = np.genfromtxt('data/circles.csv', delimiter=',')
+    pts = np.array([tuple(x) for x in pts if x[-1] != 0.282297])
     pts = pts[:, :2]
     # add dimensions (pseudorandom)
-    for _ in range(1):
-        z = np.random.rand(len(pts), 1)
-        pts = np.append(pts, z, 1)
-    print(pts.shape)
+    #for _ in range(1):
+    #    z = np.random.rand(len(pts), 1)
+    #    pts = np.append(pts, z, 1)
+    #print(pts.shape)
 
     """
     # manual choosen points
@@ -80,9 +89,9 @@ if __name__ == '__main__':
     #print(test.connected)
     #test.verify_result()
     #test.plot_simplices()
-    print(len(test.result))
-    #plot_2d(test.result)
-    plot_3d(test.result)
+    #print(len(test.result))
+    plot_2d(test.result)
+    #plot_3d(test.result)
 
     # --------------------------------------------------------
     # Combi

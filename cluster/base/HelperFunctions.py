@@ -48,6 +48,7 @@ def get_connected_points_old(points):
 
 
 def get_connected_points(points):
+    # TODO: better functions, this is to inefficient
     zwi_erg = []
     end_erg = []
     temp_set = set()
