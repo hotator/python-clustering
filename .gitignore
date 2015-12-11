@@ -12,3 +12,6 @@ __pycache__
 
 # IntelliJ IDEA
 .idea
+
+# special files
+vesseltest.csv

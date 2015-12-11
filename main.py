@@ -10,6 +10,24 @@ from sklearn import datasets
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
+from random import shuffle
+
+
+def get_colors():
+    # These are the "Tableau 20" colors as RGB.
+    tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),
+                 (44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),
+                 (148, 103, 189), (197, 176, 213), (140, 86, 75), (196, 156, 148),
+                 (227, 119, 194), (247, 182, 210), (127, 127, 127), (199, 199, 199),
+                 (188, 189, 34), (219, 219, 141), (23, 190, 207), (158, 218, 229)]
+
+    # Scale the RGB values to the [0, 1] range, which is the format matplotlib accepts.
+    for i in range(len(tableau20)):
+        r, g, b = tableau20[i]
+        tableau20[i] = (r / 255., g / 255., b / 255.)
+
+    shuffle(tableau20)  # FIXME: really?
+    return tableau20
 
 
 def plot_2d(data_set):
@@ -18,10 +36,11 @@ def plot_2d(data_set):
         :param data_set:
             format: [[point, point, point], [point, point, point, point]...]
     """
-    colors = 'rgbcmyk'
+    #colors = 'rgbcmyk'
+    colors = get_colors()
     for i, point_list in enumerate(data_set):
         x, y = zip(*point_list)
-        plt.plot(x, y, colors[i % 7] + "o")
+        plt.scatter(x, y, color=colors[i % len(colors)], marker='o')
     print("Number of cluster: {}".format(len(data_set)))
     plt.show()
 
@@ -34,10 +53,11 @@ def plot_3d(data_set):
     """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    colors = 'rgbcmyk'
+    #colors = 'rgbcmyk'
+    colors = get_colors()
     for i, vals in enumerate(data_set):
         x, y, z = zip(*vals)
-        ax.scatter(x, y, z, c=colors[i % 7])
+        ax.scatter(x, y, z, color=colors[i % len(colors)])
     print("Number of cluster: {}".format(len(data_set)))
     plt.show()
 
@@ -57,13 +77,13 @@ if __name__ == '__main__':
     #Y = iris.target
 
     # antenne, moons, duenn, achsen, points_bloed, sixfour, noise, circles, blobs
-    pts = np.genfromtxt('data/circles.csv', delimiter=',')
+    pts = np.genfromtxt('data/moons.csv', delimiter=',')
     pts = np.array([tuple(x) for x in pts if x[-1] != 0.282297])
     pts = pts[:, :2]
     # add dimensions (pseudorandom)
-    #for _ in range(1):
-    #    z = np.random.rand(len(pts), 1)
-    #    pts = np.append(pts, z, 1)
+    for _ in range(1):
+        z = np.random.rand(len(pts), 1)
+        pts = np.append(pts, z, 1)
     #print(pts.shape)
 
     """
@@ -90,8 +110,8 @@ if __name__ == '__main__':
     #test.verify_result()
     #test.plot_simplices()
     #print(len(test.result))
-    plot_2d(test.result)
-    #plot_3d(test.result)
+    #plot_2d(test.result)
+    plot_3d(test.result)
 
     # --------------------------------------------------------
     # Combi
