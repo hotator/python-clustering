@@ -3,9 +3,11 @@
 """ clustering with delauny triangulation """
 
 from .base.Cluster import Cluster
-from .base.HelperFunctions import get_connected_points, mydist
+from .base.HelperFunctions import mydist
 from scipy.spatial import Delaunay
 import matplotlib.pyplot as plt
+import numpy as np
+import networkx as nx
 
 
 class Tri(Cluster):
@@ -27,18 +29,34 @@ class Tri(Cluster):
         dist.sort()
         self.connected = [(p1, p2) for _, p1, p2 in dist]
 
+    def get_minimum_connected(self):
+        temp_set = set()
+        i = len(self.connected)
+        for i in range(len(self.connected)):
+            temp_set |= {self.connected[i][0], self.connected[i][1]}
+            if len(temp_set) == len(self.points):
+                break
+        self.connected = self.connected[:i+1]
+
+    def get_matrix(self):
+        m = np.zeros((len(self.points), len(self.points)))
+
+        for t in self.connected:
+            x, y = min(t), max(t)
+            m[(x, y)] = 1
+
+        return m
+
     def calculate(self):
         # TODO: for areas simple extra function like this - this = proxy
         self.get_connected()
+        self.get_minimum_connected()
+        m = self.get_matrix()
 
-        temp_set = set()
-        pre_res = []
-        for p in self.connected:
-            temp_set |= {p[0], p[1]}
-            pre_res += [[tuple(self.points[p[0]]), tuple(self.points[p[1]])]]
-            if len(temp_set) == len(self.points):
-                break
-        self.result = get_connected_points(pre_res)
+        G = nx.from_numpy_matrix(m)
+        con_comp = list(nx.connected_components(G))
+        for i in range(len(con_comp)):
+            self.result += [[tuple(self.points[comp]) for comp in list(con_comp[i])]]
 
     def plot_simplices(self):
         plt.triplot(self.points[:, 0], self.points[:, 1], self.tri.simplices.copy())
