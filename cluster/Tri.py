@@ -15,28 +15,39 @@ class Tri(Cluster):
         Cluster.__init__(self, points)
         self.tri = Delaunay(self.points)
         self.connected = []
+        self.dists = []
 
     def find_neighbors(self, pindex):
         return self.tri.vertex_neighbor_vertices[1][self.tri.vertex_neighbor_vertices[0][pindex]:self.tri.vertex_neighbor_vertices[0][pindex+1]]
 
-    def get_connected(self):
-        dist = []
+    def gen_all_connected(self):
         for i, p in enumerate(self.points):
             neighbors = self.find_neighbors(i)
-            dist += [(mydist(p, self.points[n]), i, n) for n in neighbors]
-        print(dist)
-        dist = list(set(dist))
-        dist.sort()
-        self.connected = [(p1, p2) for _, p1, p2 in dist]
+            self.dists += [(mydist(p, self.points[n]), i, n) for n in neighbors]
 
-    def get_minimum_connected(self):
+    def min_connect_generator(self):
+        dist = list(set(self.dists))
+        dist.sort()
+        for _, p1, p2 in dist:
+            yield (p1, p2)
+
+    def gen_min_connected(self):
         temp_set = set()
-        i = len(self.connected)
-        for i in range(len(self.connected)):
-            temp_set |= {self.connected[i][0], self.connected[i][1]}
-            if len(temp_set) == len(self.points):
+        for p in self.min_connect_generator():
+            self.connected += [p]
+            temp_set |= {p[0], p[1]}
+            if len(self.points) == len(temp_set):
                 break
-        self.connected = self.connected[:i+1]
+
+    def find_threshold(self):
+        """ find threshold for gen_threshold_connected """
+        # TODO: implement, maybe dbscan 1 dim
+        pass
+
+    def gen_threshold_connected(self, threshold=1):
+        for d, p1, p2 in self.dists:
+            if d < threshold:
+                self.connected += [(p1, p2)]
 
     def get_matrix(self):
         m = np.zeros((len(self.points), len(self.points)))
@@ -47,16 +58,28 @@ class Tri(Cluster):
 
         return m
 
-    def calculate(self):
-        # TODO: for areas simple extra function like this - this = proxy
-        self.get_connected()
-        self.get_minimum_connected()
+    def gen_labels(self):
         m = self.get_matrix()
+        g = nx.from_numpy_matrix(m)
+        self.labels = list(nx.connected_components(g))
 
-        G = nx.from_numpy_matrix(m)
-        con_comp = list(nx.connected_components(G))
-        for i in range(len(con_comp)):
-            self.result += [[tuple(self.points[comp]) for comp in list(con_comp[i])]]
+    def gen_result_from_labels(self):
+        self.result = []
+        for i in range(len(self.labels)):
+            self.result += [[tuple(self.points[comp]) for comp in list(self.labels[i])]]
+
+    def calculate(self, threshold=None):
+        # generate all connections
+        self.gen_all_connected()
+        # type of connection
+        if threshold:
+            self.gen_threshold_connected(threshold=threshold)
+        else:
+            self.gen_min_connected()
+        # generate labels
+        self.gen_labels()
+        # generate result from labels
+        self.gen_result_from_labels()
 
     def plot_simplices(self):
         plt.triplot(self.points[:, 0], self.points[:, 1], self.tri.simplices.copy())

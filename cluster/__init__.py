@@ -4,6 +4,7 @@
 from .Onion import Onion
 from .Combi import Combi
 from .Tri import Tri
+from .TriBeauty import TriBeauty
 from .Voro import Voro
 
 __author__ = 'Stephan Besecke <stephan.besecke@st.ovgu.de>'

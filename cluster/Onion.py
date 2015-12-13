@@ -3,7 +3,6 @@
 """ simple and not powerfull clustering algorithm using convex hull """
 
 from .base.Cluster import Cluster
-from .base.HelperFunctions import get_connected_points
 import numpy as np
 from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
@@ -74,7 +73,6 @@ class Onion(Cluster):
         self.cur_point = tuple(point)
         level_up_points = self.get_level_up_points()
         level_down_points = self.get_level_down_points()
-        # hull_points = self.get_hull_points()
         n_points = level_up_points + level_down_points
         res = self.calc_nearest(n_points)
         return res[:n]
@@ -91,7 +89,8 @@ class Onion(Cluster):
                 la += [[point] + self.point_dict[point]]
             else:
                 la += [[point]]
-        self.result = get_connected_points(la)
+        # FIXME: broken
+        #self.result = get_connected_points(la)
 
     def plot_connected_points(self):
         assert self.point_dict

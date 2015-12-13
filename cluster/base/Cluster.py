@@ -6,15 +6,15 @@ from __future__ import print_function
 
 import numpy as np
 import matplotlib.pyplot as plt
+from .HelperFunctions import get_colors
+from mpl_toolkits.mplot3d import Axes3D
 
 
 class Cluster(object):
     def __init__(self, points):
-        """ constuctor """
-        # TODO: has verify -> as init argument
         # Attributes
         self.points = points
-        self.verify = []
+        self.labels = []
         self.result = []
 
     def __str__(self):
@@ -31,12 +31,10 @@ class Cluster(object):
         return zip(p, p[1:] + [p[0]])
 
     def open_csv(self, filename="la.csv"):
-        """ read a csv-file into numpy array """
         self.points = np.genfromtxt(filename, delimiter=',')
 
     @staticmethod
     def save_csv(output, filename="test.csv"):
-        """ write numpy array into csv-file """
         np.savetxt(filename, output, fmt="%.2f,%.2f,%d")
 
     def calculate(self):
@@ -50,18 +48,35 @@ class Cluster(object):
     def plot_marker(x, y):
         plt.plot(x, y, "or", color="red", ms=10.0)
 
-    def verify_result(self):
-        # TODO: update function
-        print("Verification")
-        res_len = len(self.result)
-        ver_len = len(set(x for x in self.verify))
-        print([int(x) for x in self.verify])
-        print(self.result)
-        if ver_len > 0 and res_len > 0:
-            print(ver_len, res_len)
-        elif ver_len > 0:
-            print("result not computed")
-        elif res_len > 0:
-            print("no verification data found")
-        else:
-            print("verification and result not found")
+    def show_res(self, comp_list=None):
+        """
+            plot the results in 3d
+            format: [[point, point, point], [point, point, point, point]...]
+            :param comp_list - [1,3,4] - plot only 1 3 and 4 as result
+        """
+
+        # Plot
+        fig = plt.figure()
+        #colors = 'rgbcmyk'
+        colors = get_colors()
+
+        dim = len(self.result[0][0])
+        if dim == 2:
+            # 2D
+            for i, point_list in enumerate(self.result):
+                if comp_list and i not in comp_list:
+                    continue
+                x, y = zip(*point_list)
+                plt.scatter(x, y, c=colors[i % len(colors)], marker='o')
+        elif dim == 3:
+            # 3D
+            ax = fig.add_subplot(111, projection='3d')
+            for i, vals in enumerate(self.result):
+                if comp_list and i not in comp_list:
+                    continue
+                x, y, z = zip(*vals)
+                ax.scatter(x, y, z, c=colors[i % len(colors)])
+        if dim in [2, 3]:
+            plt.show()
+        print("Number of cluster: {}".format(len(self.result)))
+
