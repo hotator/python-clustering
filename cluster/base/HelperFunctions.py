@@ -21,7 +21,7 @@ def get_flat_list(list_of_lists):
 
 
 def mydist(p1, p2):
-    return np.linalg.norm(p1-p2)
+    return np.linalg.norm(np.array(p1)-np.array(p2))
 
 
 def distance(p0, p1):
