@@ -11,11 +11,12 @@ import networkx as nx
 
 
 class Tri(Cluster):
-    def __init__(self, points):
+    def __init__(self, points, min_cluster_size=0):
         Cluster.__init__(self, points)
         self.tri = Delaunay(self.points)
         self.connected = []
         self.dists = []
+        self.min_cluster_size = min_cluster_size
 
     def find_neighbors(self, pindex):
         return self.tri.vertex_neighbor_vertices[1][self.tri.vertex_neighbor_vertices[0][pindex]:self.tri.vertex_neighbor_vertices[0][pindex+1]]
@@ -65,8 +66,12 @@ class Tri(Cluster):
 
     def gen_result_from_labels(self):
         self.result = []
+        self.noise = []
         for i in range(len(self.labels)):
-            self.result += [[tuple(self.points[comp]) for comp in list(self.labels[i])]]
+            if self.min_cluster_size and len(self.labels[i]) < self.min_cluster_size:
+                self.noise += [tuple(self.points[comp]) for comp in list(self.labels[i])]
+            else:
+                self.result += [[tuple(self.points[comp]) for comp in list(self.labels[i])]]
 
     def calculate(self, threshold=None):
         # generate all connections
@@ -83,3 +88,4 @@ class Tri(Cluster):
 
     def plot_simplices(self):
         plt.triplot(self.points[:, 0], self.points[:, 1], self.tri.simplices.copy())
+        plt.show()

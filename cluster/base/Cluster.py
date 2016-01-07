@@ -16,6 +16,7 @@ class Cluster(object):
         self.points = points
         self.labels = []
         self.result = []
+        self.noise = []
 
     def __str__(self):
         """ String representation """
@@ -60,7 +61,7 @@ class Cluster(object):
         #colors = 'rgbcmyk'
         colors = get_colors()
 
-        dim = len(self.result[0][0])
+        dim = len(self.result[0][0]) if self.result else 0
         if dim == 2:
             # 2D
             for i, point_list in enumerate(self.result):
@@ -68,6 +69,10 @@ class Cluster(object):
                     continue
                 x, y = zip(*point_list)
                 plt.scatter(x, y, c=colors[i % len(colors)], marker='o')
+            # print noise
+            if self.noise:
+                x, y = zip(*self.noise)
+                plt.scatter(x, y, c='b', marker='o')
         elif dim == 3:
             # 3D
             ax = fig.add_subplot(111, projection='3d')
@@ -76,6 +81,11 @@ class Cluster(object):
                     continue
                 x, y, z = zip(*vals)
                 ax.scatter(x, y, z, c=colors[i % len(colors)])
+            # print noise
+            if self.noise:
+                x, y, z = zip(*self.noise)
+                ax.scatter(x, y, z, c='b', marker='o')
+
         if dim in [2, 3]:
             plt.show()
         print("Number of cluster: {}".format(len(self.result)))

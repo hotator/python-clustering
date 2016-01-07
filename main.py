@@ -56,7 +56,7 @@ def get_data(name=''):
         return get_vessel()
     if name == 'random':
         return get_random_blobs()
-    if name in ['antenne', 'moons', 'duenn', 'achsen', 'points_bloed', 'sixfour', 'noise', 'circles', 'blobs']:
+    if name in ['antenne', 'aggregation', 'moons', 'duenn', 'achsen', 'points_bloed', 'sixfour', 'noise', 'circles', 'blobs']:
         return get_2d_data(name)
     print('all is wrong')
 
@@ -64,36 +64,25 @@ if __name__ == '__main__':
 
     # get some data
 
-    # antenne, moons, duenn, achsen, points_bloed, sixfour, noise, circles, blobs
+    # antenne, aggregation, moons, duenn, achsen, points_bloed, sixfour, noise, circles, blobs
     # vessel
     # random
-    #pts = get_data('vessel')
-    pts, bla = datasets.make_blobs(n_samples=2000, centers=8, n_features=3, cluster_std=0.5, shuffle=False)
-    print(pts.shape)
+    pts = get_data('aggregation')
+    #print(pts.shape)
 
     # --------------------------------------------------------
     # Tri
 
-    test = Tri(pts)
-    test.calculate()
+    #test = Tri(pts)
+    #test.calculate()
     #test.plot_simplices()
-    # TODO: implement accuracy function
-    '''
-    res_labels = np.zeros(len(pts), dtype=int)
-    for i, l_list in enumerate(test.labels):
-        for l in l_list:
-            res_labels[l] = i
-    #print(res_labels)
-
-    quali = 0
-    for i in range(len(bla)):
-        if bla[i] == res_labels[i]:
-            quali += 1
-    print(quali/len(bla) * 1.)
-    '''
-    test.show_res()
+    #test.show_res()
     #test.plot_points()
     #test.plot_simplices()
+
+    # --------------------------------------------------------
+    # Autoclust
+    test = Autoclust(pts)
 
     # --------------------------------------------------------
     # Combi

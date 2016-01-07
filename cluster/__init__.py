@@ -4,8 +4,8 @@
 from .Onion import Onion
 from .Combi import Combi
 from .Tri import Tri
-from .TriBeauty import TriBeauty
 from .Voro import Voro
+from .Autoclust import Autoclust
 
 __author__ = 'Stephan Besecke <stephan.besecke@st.ovgu.de>'
 __date__ = '05.12.2015'
