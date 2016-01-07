@@ -88,5 +88,6 @@ class Cluster(object):
 
         if dim in [2, 3]:
             plt.show()
-        print("Number of cluster: {}".format(len(self.result)))
+        print("clusters: {}".format(len(self.result)))
+        print("noisepts: {}".format(len(self.noise)))
 

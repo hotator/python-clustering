@@ -18,8 +18,8 @@ def get_iris_from_sklearn():
     # import iris from sklearn.datasets
     iris = datasets.load_iris()
     pts = iris.data[:, :2]  # we only take the first two features.
-    Y = iris.target
-    return pts, Y
+    y = iris.target
+    return pts, y
 
 
 def get_vessel():
@@ -67,22 +67,17 @@ if __name__ == '__main__':
     # antenne, aggregation, moons, duenn, achsen, points_bloed, sixfour, noise, circles, blobs
     # vessel
     # random
-    pts = get_data('aggregation')
+    pts = get_data('circles')
     #print(pts.shape)
 
     # --------------------------------------------------------
     # Tri
 
-    #test = Tri(pts)
-    #test.calculate()
-    #test.plot_simplices()
-    #test.show_res()
-    #test.plot_points()
-    #test.plot_simplices()
+    #Tri(pts)
 
     # --------------------------------------------------------
     # Autoclust
-    test = Autoclust(pts)
+    Autoclust(pts)
 
     # --------------------------------------------------------
     # Combi

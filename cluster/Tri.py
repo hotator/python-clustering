@@ -11,12 +11,16 @@ import networkx as nx
 
 
 class Tri(Cluster):
-    def __init__(self, points, min_cluster_size=0):
+    def __init__(self, points, min_cluster_size=0, threshold=0):
         Cluster.__init__(self, points)
         self.tri = Delaunay(self.points)
         self.connected = []
         self.dists = []
         self.min_cluster_size = min_cluster_size
+        self.threshold = threshold
+
+        # call calculation
+        self.calculate()
 
     def find_neighbors(self, pindex):
         return self.tri.vertex_neighbor_vertices[1][self.tri.vertex_neighbor_vertices[0][pindex]:self.tri.vertex_neighbor_vertices[0][pindex+1]]
@@ -45,9 +49,9 @@ class Tri(Cluster):
         # TODO: implement, maybe dbscan 1 dim
         pass
 
-    def gen_threshold_connected(self, threshold=1):
+    def gen_threshold_connected(self):
         for d, p1, p2 in self.dists:
-            if d < threshold:
+            if d < self.threshold:
                 self.connected += [(p1, p2)]
 
     def get_matrix(self):
@@ -73,18 +77,20 @@ class Tri(Cluster):
             else:
                 self.result += [[tuple(self.points[comp]) for comp in list(self.labels[i])]]
 
-    def calculate(self, threshold=None):
+    def calculate(self):
         # generate all connections
         self.gen_all_connected()
         # type of connection
-        if threshold:
-            self.gen_threshold_connected(threshold=threshold)
+        if self.threshold:
+            self.gen_threshold_connected()
         else:
             self.gen_min_connected()
         # generate labels
         self.gen_labels()
         # generate result from labels
         self.gen_result_from_labels()
+        # show results
+        self.show_res()
 
     def plot_simplices(self):
         plt.triplot(self.points[:, 0], self.points[:, 1], self.tri.simplices.copy())
