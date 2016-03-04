@@ -1,10 +1,10 @@
-#!/usr/bin/python3.3
+#!/usr/bin/python3.4
 # -*- coding: utf-8 -*-
 
-from .Onion import Onion
-from .Combi import Combi
+#from .Onion import Onion
+#from .Combi import Combi
 from .Tri import Tri
-from .Voro import Voro
+#from .Voro import Voro
 from .Autoclust import Autoclust
 
 __author__ = 'Stephan Besecke <stephan.besecke@st.ovgu.de>'

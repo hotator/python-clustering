@@ -1,4 +1,4 @@
-#!/usr/bin/python3.3
+#!/usr/bin/python3.4
 # -*- coding: utf-8 -*-
 
 __author__ = 'Stephan Besecke <stephan.besecke@st.ovgu.de>'

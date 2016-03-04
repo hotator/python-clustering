@@ -8,6 +8,20 @@ from numpy.linalg import norm
 from random import shuffle
 
 
+def find_in_sublists(value, l):
+    erg = [i for i, x in enumerate(l) if value in x]
+    return erg[0] if erg else -1
+
+
+def get_other_node(value, edge):
+    assert value in edge  # asume value is in edge
+    return edge[0] if edge[1] == value else edge[1]
+
+
+def find_adjacent_edges(edge_index, edges):
+    return [edge for edge in edges if edge_index in edge]
+
+
 def get_related_points(point, points):
     res = []
     for p in points:

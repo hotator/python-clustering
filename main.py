@@ -5,6 +5,7 @@
 import numpy as np
 from cluster import *
 from sklearn import datasets
+from cluster.triclust import cluster
 
 
 def get_random_blobs():
@@ -56,7 +57,7 @@ def get_data(name=''):
         return get_vessel()
     if name == 'random':
         return get_random_blobs()
-    if name in ['antenne', 'aggregation', 'moons', 'duenn', 'achsen', 'points_bloed', 'sixfour', 'noise', 'circles', 'blobs']:
+    if name in ['antenne', 'aggregation', 'compound', 'moons', 'duenn', 'achsen', 'points_bloed', 'sixfour', 'noise', 'circles', 'blobs']:
         return get_2d_data(name)
     print('all is wrong')
 
@@ -67,13 +68,17 @@ if __name__ == '__main__':
     # antenne, aggregation, moons, duenn, achsen, points_bloed, sixfour, noise, circles, blobs
     # vessel
     # random
-    pts = get_data('circles')
+    pts = get_data('blobs')
     #print(pts.shape)
 
     # --------------------------------------------------------
     # Tri
 
     #Tri(pts)
+
+    # --------------------------------------------------------
+    # Triclust test
+    #print(cluster(pts)[0])
 
     # --------------------------------------------------------
     # Autoclust
