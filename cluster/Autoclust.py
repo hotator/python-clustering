@@ -24,10 +24,11 @@ class Autoclust(Cluster):
         self.all_long_edges = []
         self.all_other_edges = []
 
+        # calculate
         self.calculate()
 
     def pre(self):
-        print('pre')
+        #print('pre')
         self.get_edges()
         local_devs = []
         for i in range(len(self.points)):
@@ -66,7 +67,7 @@ class Autoclust(Cluster):
             self.acd[i].update({'long_edges': long_edges, 'short_edges': short_edges, 'other_edges': other_edges})
 
     def phase1(self):
-        print('phase1')
+        #print('phase1')
         # remove long edges and short edges
         for i in range(len(self.points)):
             short_edges = self.acd[i]['short_edges']
@@ -75,7 +76,7 @@ class Autoclust(Cluster):
             self.edges -= long_edges
 
     def phase2(self):
-        print('phase2')
+        #print('phase2')
         connected_components = self.find_connected_components()
         for i in range(len(self.points)):
             short_edges = self.acd[i]['short_edges']
@@ -113,7 +114,7 @@ class Autoclust(Cluster):
                     self.edges |= short_edges
 
     def phase3(self):
-        print('phase3')
+        #print('phase3')
         for i in range(len(self.points)):
             edges_within_two = set()
             adjacent_edges = find_adjacent_edges(i, self.edges)
@@ -173,19 +174,19 @@ class Autoclust(Cluster):
 
         self.pre()
         self.phase1()
-        self.labels = self.find_connected_components()
-        self.gen_result_from_labels()
-        self.show_res()
+        #self.labels = self.find_connected_components()
+        #self.gen_result_from_labels()
+        #self.show_res()
         #self.plot_edges()
 
         self.phase2()
-        self.labels = self.find_connected_components()
-        self.gen_result_from_labels()
-        self.show_res()
+        #self.labels = self.find_connected_components()
+        #self.gen_result_from_labels()
+        #self.show_res()
         #self.plot_edges()
 
         self.phase3()
         self.labels = self.find_connected_components()
-        self.gen_result_from_labels()
-        self.show_res()
+        #self.gen_result_from_labels()
+        #self.show_res()
         #self.plot_edges()

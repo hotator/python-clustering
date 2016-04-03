@@ -88,9 +88,9 @@ class Tri(Cluster):
         # generate labels
         self.gen_labels()
         # generate result from labels
-        self.gen_result_from_labels()
+        #self.gen_result_from_labels()
         # show results
-        self.show_res()
+        #self.show_res()
 
     def plot_simplices(self):
         plt.triplot(self.points[:, 0], self.points[:, 1], self.tri.simplices.copy())

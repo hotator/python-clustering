@@ -2,8 +2,6 @@
 # -*- encoding: utf-8 -*-
 """ multiple clustering algorithms """
 
-from __future__ import print_function
-
 import numpy as np
 import matplotlib.pyplot as plt
 from .HelperFunctions import get_colors

@@ -6,13 +6,16 @@ import numpy as np
 from cluster import *
 from sklearn import datasets
 from cluster.triclust import cluster
+from multiprocessing import Pool
+import os
 
 
 def get_random_blobs():
     # some random blobs with differend density
-    pts, _ = datasets.make_blobs(n_samples=300, n_features=3, cluster_std=0.5, centers=2, random_state=42)
-    pts2, _ = datasets.make_blobs(n_samples=100, n_features=3, cluster_std=2, centers=1, random_state=564)
-    return np.concatenate((pts, pts2), axis=0)
+    pts, _ = datasets.make_blobs(n_samples=300, n_features=7, cluster_std=0.5, centers=2, random_state=42)
+    #pts2, _ = datasets.make_blobs(n_samples=100, n_features=37, cluster_std=2, centers=1, random_state=564)
+    #return np.concatenate((pts, pts2), axis=0)
+    return pts
 
 
 def get_iris_from_sklearn():
@@ -61,20 +64,71 @@ def get_data(name=''):
         return get_2d_data(name)
     print('all is wrong')
 
+
+def compare_labels(real_labels, computed_labels):
+    res = dict()
+    for i, s in enumerate(computed_labels):
+        for val in list(s):
+            tmp = (real_labels[val], i)
+            if tmp not in res:
+                res[tmp] = 1
+            else:
+                res[tmp] += 1
+    return res
+    #z_list = list(zip(*t_list))
+    #error1 = len(z_list[0]) != len(set(z_list[0]))  # cut one cluster in 2 or more
+    #error2 = len(z_list[1]) != len(set(z_list[1]))  # merge 2 or more different cluster
+    #print(error1, error2)
+
+
+def calc(_):
+    for n_sample in range(100, 501, 100):
+        for n_feature in range(2, 10):
+            for center in range(2, 10):
+                pts, labels = datasets.make_blobs(n_samples=n_sample, n_features=n_feature, cluster_std=0.5, centers=4)
+                tri = Tri(pts)
+                tri_res = compare_labels(labels, tri.labels)
+                auto = Autoclust(pts)
+                auto_res = compare_labels(labels, auto.labels)
+                res_dict = {'tri': tri_res, 'auto': auto_res}
+
+                with open('S' + str(n_sample) + 'F' + str(n_feature) + 'C' + str(center), 'a') as f:
+                    print(res_dict, file=f)
+
+
+def load():
+    with open('S100F3C8', 'r') as f:
+        for l in f.readlines():
+            print(l)
+            x = eval(l)
+            print(x['auto'].keys())
+            print(type(x))
+
+
 if __name__ == '__main__':
+    os.chdir('results')
+    p = Pool()
+    p.map(calc, range(250))
 
     # get some data
 
     # antenne, aggregation, moons, duenn, achsen, points_bloed, sixfour, noise, circles, blobs
     # vessel
     # random
-    pts = get_data('blobs')
+    #pts = get_data('random')
     #print(pts.shape)
+
+    #pts, correct_labels = get_random_blobs()
+    #print(correct_labels)
 
     # --------------------------------------------------------
     # Tri
 
-    #Tri(pts)
+    #tri = Tri(pts)
+    #print(tri.labels)
+    #compare_labels(correct_labels, tri.labels)
+    #tri.gen_result_from_labels()
+    #tri.show_res()
 
     # --------------------------------------------------------
     # Triclust test
@@ -82,7 +136,9 @@ if __name__ == '__main__':
 
     # --------------------------------------------------------
     # Autoclust
-    Autoclust(pts)
+    #auto = Autoclust(pts)
+    #compare_labels(correct_labels, auto.labels)
+    #print(auto.labels)
 
     # --------------------------------------------------------
     # Combi
