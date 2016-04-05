@@ -81,10 +81,11 @@ def compare_labels(real_labels, computed_labels):
     #print(error1, error2)
 
 
-def calc(_):
-    for n_sample in range(100, 501, 100):
-        for n_feature in range(2, 10):
-            for center in range(2, 10):
+def calc(center):
+    for _ in range(250):
+        for n_sample in range(100, 501, 100):
+            for n_feature in range(2, 5):
+                #for center in range(2, 10):
                 pts, labels = datasets.make_blobs(n_samples=n_sample, n_features=n_feature, cluster_std=0.5, centers=4)
                 tri = Tri(pts)
                 tri_res = compare_labels(labels, tri.labels)
@@ -94,6 +95,23 @@ def calc(_):
 
                 with open('S' + str(n_sample) + 'F' + str(n_feature) + 'C' + str(center), 'a') as f:
                     print(res_dict, file=f)
+
+
+def single_calc():
+    n_sample = 100
+    n_feature = 5
+    cluster_std = 0.5
+    center = 9
+
+    pts, labels = datasets.make_blobs(n_samples=n_sample, n_features=n_feature, cluster_std=cluster_std, centers=center)
+    tri = Tri(pts)
+    tri_res = compare_labels(labels, tri.labels)
+    auto = Autoclust(pts)
+    auto_res = compare_labels(labels, auto.labels)
+    res_dict = {'tri': tri_res, 'auto': auto_res}
+
+    with open('S' + str(n_sample) + 'F' + str(n_feature) + 'C' + str(center), 'a') as f:
+        print(res_dict, file=f)
 
 
 def load():
@@ -108,7 +126,9 @@ def load():
 if __name__ == '__main__':
     os.chdir('results')
     p = Pool()
-    p.map(calc, range(250))
+    p.map(calc, range(3, 10))
+    #p.map(single_calc, range(200, 401, 100))
+    #single_calc()
 
     # get some data
 
