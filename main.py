@@ -1,99 +1,67 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 """ multiple clustering algorithms """
 
-import numpy as np
-from cluster import *
-from sklearn import datasets
-from cluster.triclust import cluster
-from multiprocessing import Pool
-import matplotlib.pylab as pl
 import re
 import os
-from sklearn.metrics.cluster import adjusted_rand_score
 from timeit import default_timer as timer
+
+from sklearn import datasets
+from sklearn.metrics.cluster import adjusted_rand_score
+#from cluster.triclust import cluster
+#from multiprocessing import Pool
+import matplotlib.pylab as pl
+import numpy as np
+from cluster import Tri, Autoclust
+from cluster.base.HelperFunctions import labelset_to_labels
 
 
 def get_random_blobs():
-    # some random blobs with differend density
+    """ genernate some random blobs with differend density """
     pts, _ = datasets.make_blobs(n_samples=300, n_features=7, cluster_std=0.5, centers=2, random_state=42)
     #pts2, _ = datasets.make_blobs(n_samples=100, n_features=37, cluster_std=2, centers=1, random_state=564)
     #return np.concatenate((pts, pts2), axis=0)
     return pts
 
 
-def get_iris_from_sklearn():
-    # import iris from sklearn.datasets
+def get_iris():
+    """ import iris dataset from sklearn.datasets """
     iris = datasets.load_iris()
-    pts = iris.data[:, :2]  # we only take the first two features.
-    y = iris.target
-    return pts, y
+    return iris.data, iris.target
+
+
+def get_digit():
+    """ import digit dataset from sklearn.datasets """
+    digit = datasets.load_digits()
+    return digit.data, digit.target
 
 
 def get_vessel():
-    pts = np.genfromtxt('data/vesseltest.csv', delimiter=',')
-    pts = np.array([tuple(x) for x in pts if x[-1] != 0.282297])
-    pts = pts[:, :3]
-    return pts
+    """ import vessel dataset """
+    vessel = np.genfromtxt('data/vesseltest.csv', delimiter=',')
+    vessel = np.array([tuple(x) for x in vessel if x[-1] != 0.282297])
+    vessel = vessel[:, :3]
+    return vessel
 
 
-def get_2d_data(name=''):
-    pts = np.genfromtxt('data/' + name + '.csv', delimiter=',')
-    pts = pts[:, :2]
-    return pts
-
-
-def add_random_dimensions(pts, dim=1):
-    # add dimensions (pseudorandom)
+def add_random_dimensions(points, dim=1):
+    """ add dimensions (pseudorandom) """
     for _ in range(dim):
-        z = np.random.rand(len(pts), 1)
-        pts = np.append(pts, z, 1)
-    return pts
+        z = np.random.rand(len(points), 1)
+        res = np.append(points, z, 1)
+    return res
 
 
 def get_manual_3d_data():
-    # manual choosen points
+    """ get manual choosen dataset """
     x = [1, 6, 8, 3, 2, 2, 6, 6, 7, 7, 8, 8]
     y = [5, 2, 1, 5, 4, 6, 1, 8, 3, 6, 3, 7]
     z = [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]
     return np.asarray(list(zip(x, y, z)))
 
 
-def get_data(name=''):
-    if name == 'vessel':
-        return get_vessel()
-    if name == 'random':
-        return get_random_blobs()
-    if name in ['antenne', 'aggregation', 'compound', 'moons', 'duenn', 'achsen', 'points_bloed', 'sixfour', 'noise', 'circles', 'blobs']:
-        return get_2d_data(name)
-    print('all is wrong')
-
-
-def compare_labels(real_labels, computed_labels):
-    res = dict()
-    for i, s in enumerate(computed_labels):
-        for val in list(s):
-            tmp = (real_labels[val], i)
-            if tmp not in res:
-                res[tmp] = 1
-            else:
-                res[tmp] += 1
-    return res
-    #z_list = list(zip(*t_list))
-    #error1 = len(z_list[0]) != len(set(z_list[0]))  # cut one cluster in 2 or more
-    #error2 = len(z_list[1]) != len(set(z_list[1]))  # merge 2 or more different cluster
-    #print(error1, error2)
-
-
-def labelset_to_labels(labelset, n):
-    res = [0] * n
-    for i, s in enumerate(labelset):
-        for v in s:
-            res[v] = i
-    return res
-
-
-def calc(center):
+def calculate_performance(center):
+    """ calculates the performance of autoclust and tri clust on random blobs """
     for _ in range(333):
         for n_sample in range(100, 501, 100):
             for n_feature in range(2, 5):
@@ -102,12 +70,10 @@ def calc(center):
                 pts, labels = datasets.make_blobs(n_samples=n_sample, n_features=n_feature, cluster_std=0.5, centers=center, random_state=seed)
                 labels = list(labels)
                 tri = Tri(pts)
-                #tri_res = compare_labels(labels, tri.labels)
                 tri_labels = labelset_to_labels(tri.labels, n_sample)
                 tri_res = adjusted_rand_score(labels, tri_labels)
 
                 auto = Autoclust(pts)
-                #auto_res = compare_labels(labels, auto.labels)
                 auto_labels = labelset_to_labels(auto.labels, n_sample)
                 auto_res = adjusted_rand_score(labels, auto_labels)
 
@@ -117,38 +83,38 @@ def calc(center):
                     print(res_dict, file=f)
 
 
-def single_calc(n_sample):
+def calculate_times(n_sample):
+    """ calculates time consumption of autoclust and tri clust on random blobs """
     #n_sample = 1000
     n_feature = 2
     cluster_std = 0.5
     center = 2
 
     #for n_sample in [10, 50, 100, 500, 1000, 5000, 10000]:
-
-    pts, labels = datasets.make_blobs(n_samples=n_sample, n_features=n_feature, cluster_std=cluster_std, centers=center)
+    pts, _ = datasets.make_blobs(n_samples=n_sample, n_features=n_feature, cluster_std=cluster_std, centers=center)
     start = timer()
-    tri = Tri(pts)
+    Tri(pts)
     end = timer()
     tri_time = end - start
     print(tri_time)
 
-    #tri_res = compare_labels(labels, tri.labels)
     start = timer()
-    auto = Autoclust(pts)
+    Autoclust(pts)
     end = timer()
     auto_time = end - start
     print(auto_time)
-    #auto_res = compare_labels(labels, auto.labels)
     res_dict = {'tri': tri_time, 'auto': auto_time, 'samples': n_sample}
 
     with open('times', 'a') as f:
         print(res_dict, file=f)
 
 
-def load():
+def plot_performance():
+    """ plot performance compared as boxplots """
     # regular expression
+    path_prefix = "/home/stephan/Dropbox/wcci2016/paper/figures/"
     orgfiles = os.listdir('results')
-    test = re.compile("S500")
+    test = re.compile("S100")
     files = list(filter(test.search, orgfiles))
     #files = orgfiles
     files.sort()
@@ -165,13 +131,11 @@ def load():
     for f_name in files:
         temp_tri = []
         temp_auto = []
-        with open('results/' + f_name, 'r') as f:
-            for i, l in enumerate(f):
-                x = eval(l)
+        with open('results/' + f_name, 'r') as res_file:
+            for line in res_file:
+                x = eval(line)
                 temp_tri += [x['tri_score']]
                 temp_auto += [x['auto_score']]
-        #res += [temp_tri, temp_auto]
-        #labels += ['tri', 'auto']
         res_tri += [temp_tri]
         res_auto += [temp_auto]
         labels += [f_name[4:]]
@@ -179,71 +143,22 @@ def load():
     #print(res)
 
     # tri result
-    pl.figure(figsize=(1366/96, 768/96), dpi=100)
-    pl.title('tri ' + f_name[1:4] + ' points')
     pl.boxplot(res_tri, labels=labels)
+    pl.xticks(rotation=90)
     #pl.show()
-    pl.savefig('tri'+f_name[1:4]+'.pdf')
+    pl.savefig(path_prefix + 'tri'+f_name[1:4]+'.pdf')
     pl.close()
 
     # auto result
-    pl.figure(figsize=(1366 / 96, 768 / 96), dpi=100)
-    pl.title('auto ' + f_name[1:4] + ' points')
     pl.boxplot(res_auto, labels=labels)
+    pl.xticks(rotation=90)
     #pl.show()
-    pl.savefig('auto'+f_name[1:4]+'.pdf')
+    pl.savefig(path_prefix + 'auto'+f_name[1:4]+'.pdf')
     pl.close()
 
 
-def plot_res(res_dict):
-    res = []
-    keyes = []
-
-    for key in sorted(res_dict):
-        res += [res_dict[key]]
-        keyes += [key]
-
-    res = list(zip(*res))
-    ind = np.arange(len(res_dict))
-    width = 0.2
-
-    pl_tri = pl.bar(ind, res[0], width, color='b')
-    pl_auto = pl.bar(ind + width, res[1], width, color='y')
-    pl.legend((pl_tri, pl_auto), ("tri", "auto"))
-    pl.xticks(ind + width, keyes)
-    #pl.xlabel('')
-    test = min(min(res[0]), min(res[1]))
-    print(test)
-    pl.ylim(test-0.05, 1.0)
-    pl.ylabel('Correct rate (%)')
-    pl.show()
-
-
-def plot_bar(my_result, name="invalid", verb=False, save=False):
-    """ plots a barplot for regular, second and surro """
-    res = list(zip(*my_result))
-    ind = np.array([0.25, 0.5, 0.75])
-    width = 0.20
-    pl0 = pl.bar(ind, res[0], width, color="b")
-    pl1 = pl.bar(ind, res[1], width, color="y", bottom=res[0])
-    align = np.add(res[0], res[1])
-    pl2 = pl.bar(ind, res[2], width, color="c", bottom=align)
-    align = np.add(align, res[2])
-    pl3 = pl.bar(ind, res[3], width, color="r", bottom=align)
-    pl.xticks(ind + width / 2., ["auto", "tri"])
-    #my_len = sum(my_result[0])
-    #pl.yticks(range(0, my_len+1, int(my_len/3)),
-    #    [x/float(my_len) for x in range(0, my_len+1, int(my_len/3))])
-    pl.ylabel("values")
-    pl.xlabel("algorithm")
-    pl.legend((pl0[0], pl1[0], pl2[0], pl3[0]), ("correct", "error1", "error2", "errorboth"))
-    print(res)
-    #if save:
-    #    pl.savefig(name + ".pdf")
-    pl.show()
-
-
 def plot_times():
+    """ plot results of time tests """
     res = []
     with open('times', 'r') as f:
         for l in f.readlines():
@@ -251,20 +166,24 @@ def plot_times():
             res += [(x['samples'], x['auto'], x['tri'])]
 
     res = list(zip(*res))
-    pl_auto = pl.plot(res[0], res[1])
-    pl_tri = pl.plot(res[0], res[2])
-    pl.xscale('log')
+    #pl_auto = pl.plot(res[0], res[1])
+    #pl_tri = pl.plot(res[0], res[2])
+    #all_data = np.array(res[1]) / np.array(res[2])
+    all_data = [x / res[2][i] for i, x in enumerate(res[1])]
+    pl.plot(res[0], all_data)
+    #pl.yscale('log')
     pl.ylabel("time (in seconds)")
     pl.xlabel("points (logarithmic scale)")
-    pl.legend((pl_auto[0], pl_tri[0]), ('auto', 'tri'))
+    #pl.legend((pl_auto[0], pl_tri[0]), ('auto', 'tri'))
 
     pl.show()
 
 
 def static_test():
+    """ do some tests """
     files = ['aggregation', 'compound', 'moons', 'circles']
-    for f in files:
-        data = np.genfromtxt('data/' + f + '.csv', delimiter=',')
+    for f_name in files:
+        data = np.genfromtxt('data/' + f_name + '.csv', delimiter=',')
         pts = data[:, :2]
         labels = data[:, -1]
         labels = list(labels)
@@ -286,20 +205,45 @@ def static_test():
         auto_res = adjusted_rand_score(labels, auto_labels)
 
         res_dict = {'labels': labels, 'tri_label': tri_labels, 'tri_score': tri_res, 'tri_time': tri_time,
-                    'auto_labels': auto_labels, 'auto_score': auto_res, 'auto_time': auto_time, 'name': f}
+                    'auto_labels': auto_labels, 'auto_score': auto_res, 'auto_time': auto_time, 'name': f_name}
 
         with open('res', 'a') as fi:
             print(res_dict, file=fi)
 
 
 if __name__ == '__main__':
+    #plot_times()
     #static_test()
-    name = 'aggregation'
-    data = np.genfromtxt('data/' + name + '.csv', delimiter=',')
-    pts = data[:, :2]
-    #labels = data[:, -1]
 
-    #os.chdir('results')
+    # get some data
+    # antenne, aggregation, moons, duenn, achsen,
+    # points_bloed, sixfour, noise, circles, blobs
+    # flame, pathbased
+    #name = 'moons'
+    #data = np.genfromtxt('data/' + name + '.csv', delimiter=',')
+
+    # load special datasets
+    #data, l = get_iris()
+    #data, l = get_digit()
+
+    # generate datasets
+    #data, l = datasets.make_moons(n_samples=500, noise=0.06)
+    data, l = datasets.make_circles(n_samples=1000, noise=0.06, factor=0.5)
+    #data, l = datasets.make_s_curve(n_samples=500, noise=0.02) # 3 dim
+    pts = data[:, :2]
+
+    '''
+    names = ['achsen', 'aggregation', 'blobs', 'circles', 'compound', 'D31', 'moons', 'noise', 'R15', 'spiral']
+    for name in names:
+        #name = 'spiral'
+        data = np.genfromtxt('data/' + name + '.csv', delimiter=',')
+        pts = data[:, :2]
+        labels = data[:, -1]
+        tri = Autoclust(pts)
+        tri.gen_result_from_labels()
+        tri.show_res(filename='/home/stephan/Dropbox/wcci2016/TriRes/Auto_' + name + '.pdf')
+    '''
+
     #load()
     #p = Pool()
     #p.map(calc, range(3, 10))
@@ -308,14 +252,6 @@ if __name__ == '__main__':
     #p.map(single_calc, [10, 50, 100, 500, 1000, 5000, 10000])
     #plot_times()
 
-    # get some data
-
-    # antenne, aggregation, moons, duenn, achsen, points_bloed, sixfour, noise, circles, blobs
-    # vessel
-    # random
-    #pts = get_data('random')
-    #print(pts.shape)
-
     #pts, correct_labels = get_random_blobs()
     #print(correct_labels)
 
@@ -323,24 +259,22 @@ if __name__ == '__main__':
     # Tri
 
     tri = Tri(pts)
+    #tri.plot_simplices()
     #tri_labels = labelset_to_labels(tri.labels, len(labels))
     #print(tri.labels)
-    #compare_labels(correct_labels, tri.labels)
+    #tri.labels = [1, 1, 1, 2, 2, 2, 1, 2, 3, 2, 1, 1, 1, 1, 1, 3, 3, 3, 1, 3, 2, 3, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 3, 1, 4, 2, 1, 3, 2, 1, 2, 2, 2, 2, 1, 1, 2, 3, 3, 1, 3, 2, 2, 2, 3, 2, 2, 1, 2, 3, 2, 2, 1, 2, 1, 2, 2, 3, 3, 1, 1, 3, 1, 2, 2, 1, 1, 3, 1, 1, 2, 2, 1, 1, 3, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 3, 3, 3, 1, 3, 1, 1, 2, 2, 1, 3, 1, 3, 3, 1, 2, 2, 3, 2, 1, 1, 3, 1, 1, 2, 2, 2, 1, 2, 3, 2, 1, 3, 2, 3, 1, 1, 2, 2, 3, 3, 1, 1, 1, 3, 2, 2, 1, 3, 2, 3, 2, 2, 2, 3, 1, 2, 1, 2, 1, 2, 2, 1, 3, 1, 3, 1, 1, 1, 3, 3, 3, 2, 1, 3, 1, 3, 1, 2, 3, 3, 1, 2, 2, 1, 1, 2, 3, 3, 1, 2, 1, 1, 2, 1, 2, 1, 1, 2, 2, 3, 1, 2, 2, 2, 1, 3, 3, 3, 3, 2, 3, 1, 3, 1, 1, 3, 2, 2, 2, 3, 3, 3, 1, 3, 1, 2, 2, 3, 3, 3, 1, 1, 3, 2, 2, 1, 3, 3, 2, 3, 2, 2, 1, 2, 1, 3, 3, 2, 2, 2, 3, 3, 2, 1, 1, 2, 3, 3, 1, 1, 1, 2, 3, 3, 3, 3, 2, 2, 3, 1, 1, 2, 2, 2, 2, 5, 2, 3, 2, 2, 1, 2, 1, 1, 2, 3, 1, 1, 1, 1, 6, 3, 2, 3, 3, 1, 1, 1, 2, 2, 2, 1, 2, 3, 3, 1, 3, 2, 1, 1, 2, 1, 1, 1, 1, 2, 3, 3, 3, 3, 2, 3, 2, 1, 3, 2, 1, 3, 1, 1, 1, 1, 2, 3, 3, 1, 2, 3, 2, 2, 2, 1, 3, 3, 3, 3, 2, 1, 2, 3, 2, 3, 1, 3, 1, 3, 2, 2, 3, 2, 2, 3, 2, 3, 2, 3, 2, 2, 1, 3, 3, 3, 3, 3, 2, 2, 1, 3, 2, 3, 1, 7, 1, 1, 3, 2, 2, 3, 1, 1, 2, 1, 3, 2, 3, 1, 8, 2, 3, 3, 3, 2, 3, 3, 1, 3, 1, 1, 1, 1, 1, 2, 2, 2, 1, 3, 2, 3, 1, 1, 3, 3, 2, 1, 3, 3, 1, 2, 2, 1, 1, 2, 2, 2, 1, 1, 1, 3, 9, 3, 1, 2, 10, 1, 1, 2, 3, 2, 1, 1, 2, 2, 2, 1, 1, 1, 3, 1, 3, 3, 1, 1, 2, 1, 3, 3, 1, 1, 1, 1, 3, 2, 2, 1, 3, 2, 3, 1, 2, 3, 1, 3, 2, 2, 1, 2, 1, 3, 2, 1, 1, 3, 2, 1, 3, 3, 2, 1, 1, 1, 2, 1, 3, 2, 3, 2, 1, 1, 3, 2, 1, 3, 1, 1, 3, 1, 3, 3, 1, 2, 2, 3, 3, 3, 3, 2, 3, 3, 2, 2, 3, 2, 1, 2, 2, 2, 3, 2, 2, 3, 3, 3, 2, 3, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 2, 2, 1, 2, 1, 2, 1, 3, 1, 2, 3, 1, 3, 1, 2, 1, 2, 11, 3, 1, 2, 3, 1, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 3, 1, 3, 3, 1, 12, 3, 2, 3, 2, 3, 1, 3, 2, 1, 3, 1, 3, 3, 2, 3, 3, 2, 1, 1, 3, 2, 1, 1, 2, 1, 1, 3, 1, 3, 1, 1, 2, 2, 3, 3, 3, 3, 1, 2, 1, 3, 1, 3, 3, 3, 1, 3, 3, 2, 2, 2, 2, 3, 3, 2, 3, 3, 2, 1, 2, 2, 1, 1, 3, 2, 2, 2, 2, 2, 2, 3, 3, 2, 3, 2, 1, 3, 2, 2, 3, 2, 2, 1, 3, 1, 2, 3, 2, 1, 2, 3, 1, 1, 2, 1, 1, 3, 1, 1, 1, 2, 1, 1, 2, 1, 3, 2, 2, 1, 1, 3, 1, 2, 2, 1, 3, 2, 3, 3, 1, 2, 3, 2, 3, 3, 13, 3, 1, 1, 3, 3, 2, 3, 2, 2, 3, 2, 1, 1, 3, 2, 3, 3, 3, 1, 3, 2, 2, 3, 1, 2, 2, 3, 1, 3, 1, 2, 3, 3, 1, 1, 3, 2, 1, 1, 2, 3, 3, 3, 2, 2, 1, 1, 1, 2, 1, 2, 1, 3, 1, 3, 3, 1, 3, 2, 2, 2, 3, 2, 3, 1, 3, 1, 2, 2, 3, 3, 1, 3, 3, 3, 1, 1, 3, 2, 3, 2, 3, 3, 1, 3, 1, 1, 3, 1, 1, 3, 2, 3, 1, 2, 2, 1, 2, 3, 2, 3, 3, 1, 1, 3, 3, 3, 1, 1, 1, 1, 3, 2, 1, 1, 1, 1, 1, 3, 1, 14, 3, 2, 2, 3, 3, 2, 3, 3, 3, 1, 1, 2, 3, 1, 2, 2, 3, 2, 3, 1, 3, 15, 1, 3, 1, 3, 2, 3, 2, 1, 1, 3, 1, 1, 2, 3, 3, 3, 3, 1, 2, 2, 2, 3, 2, 3, 3, 1, 3, 1, 1, 1, 2, 2, 3, 2, 1, 1, 3, 2, 16, 3, 1, 1, 2, 3, 1, 2, 1, 3, 2, 1, 2, 3, 3, 3, 1, 1, 2, 3, 3, 1, 1, 1, 3, 3, 2, 1, 2, 3, 3, 2, 1, 2, 3, 1, 1, 2, 3, 2, 1, 3, 2, 3, 2, 3, 1, 1, 1, 1, 2, 3, 3, 1, 1, 3, 1, 1, 2, 1, 2, 2, 1, 1, 2, 1, 3, 3, 1, 1, 3, 1, 2, 3, 3, 1, 1, 1, 2, 3, 3, 2, 1, 1, 3, 3, 1, 3, 3, 1, 3, 2, 3, 1, 1, 2, 1, 3, 3, 3, 2, 2, 3, 1, 1, 1, 3, 3, 1, 1, 2, 3, 2, 3, 1, 2, 1, 1, 3, 2, 3, 3, 3, 2, 1, 2, 3, 1, 1, 3, 1, 3, 3, 1, 2, 1, 1, 1, 3, 3, 1, 1, 2, 2, 2, 2, 1, 3, 2, 2, 1, 3, 3, 3, 3, 2, 2, 2, 3, 2, 2, 2, 1, 2, 1, 3, 3, 2, 3, 1, 3, 3, 1, 17, 3, 3, 2, 1, 3, 3, 2, 2, 1, 3, 2, 2, 3, 2, 1, 3, 1, 2, 1, 1, 2, 2, 2, 1, 3, 2, 4, 3, 1, 1, 18, 2, 2, 2, 1, 1, 3, 2, 1, 2, 3, 1, 19, 2, 3, 1, 3, 3, 3, 2, 1, 1, 2, 20, 3, 2, 1, 3, 2, 1, 3, 1, 2, 2, 2, 3, 1, 1, 2, 3, 1, 1, 1, 3, 2, 2, 2, 2, 3, 2, 2, 3, 1, 3, 2, 1, 1, 3, 2, 3, 1, 3, 3, 2, 3, 2, 2, 3, 1, 3, 3, 3, 2, 3, 2, 1, 1, 3, 1, 2, 3, 1, 2, 1, 3, 1, 2, 2, 3, 1, 2, 2, 11, 1, 1, 3, 3, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 2, 2, 1, 2, 1, 3, 3, 2, 2, 1, 1, 2, 3, 1, 3, 2, 3, 1, 2, 1, 2, 3, 2, 1, 2, 1, 1, 3, 3, 3, 2, 3, 3, 1, 2, 2, 2, 1, 1, 3, 3, 2, 3, 3, 21, 2, 3, 1, 2, 1, 3, 2, 3, 1, 1, 3, 2, 3, 1, 1, 2, 1, 1, 3, 3, 1, 3, 2, 1, 1, 3, 2, 2, 3, 3, 2, 2, 2, 1, 2, 1, 2, 3, 2, 1, 1, 2, 3, 3, 1, 3, 2, 3, 3, 2, 2, 3, 2, 2, 1, 1, 2, 2, 3, 1, 3, 1, 1, 3, 1, 1, 2, 3, 3, 1, 2, 3, 3, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 3, 2, 2, 2, 2, 3, 3, 1, 1, 1, 2, 2, 2, 1, 1, 2, 3, 2, 2, 3, 1, 3, 3, 3, 3, 2, 2, 3, 1, 2, 2, 3, 3, 2, 3, 3, 3, 2, 2, 3, 3, 2, 3, 2, 3, 3, 2, 22, 1, 3, 23, 3, 3, 3, 3, 1, 3, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 3, 2, 1, 24, 1, 1, 3, 3, 3, 2, 2, 2, 2, 1, 3, 2, 3, 3, 2, 1, 2, 1, 1, 2, 1, 2, 2, 1, 1, 1, 1, 2, 1, 2, 3, 2, 3, 1, 1, 3, 3, 1, 3, 2, 1, 3, 1, 1, 2, 2, 1, 1, 2, 2, 3, 1, 2, 2, 2, 1, 1, 1, 3, 1, 1, 3, 3, 3, 2, 2, 1, 2, 1, 2, 1, 1, 3, 1, 2, 3, 2, 3, 3, 1, 2, 2, 1, 3, 1, 3, 3]
     tri.gen_result_from_labels()
-    tri.show_res()
-
+    tri.show_res(shuffle_colors=True)
 
     # --------------------------------------------------------
     # Autoclust
-    '''
-    auto = Autoclust(pts)
-    auto_labels = labelset_to_labels(auto.labels, len(labels))
-    print(adjusted_rand_score(labels, auto_labels))
-    #compare_labels(correct_labels, auto.labels)
+
+    #auto = Autoclust(pts)
+    #auto_labels = labelset_to_labels(auto.labels, len(labels))
+    #print(adjusted_rand_score(labels, auto_labels))
     #print(auto.labels)
-    auto.gen_result_from_labels()
-    auto.show_res()
-    '''
+    #auto.gen_result_from_labels()
+    #auto.show_res()
 
     # --------------------------------------------------------
     # Combi

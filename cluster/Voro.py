@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 """ clustering with voronoi cells """
 
+import matplotlib.pyplot as plt
 from .base.Cluster import Cluster
 from scipy.spatial import Voronoi, voronoi_plot_2d
-import matplotlib.pyplot as plt
 
 
 class Voro(Cluster):
